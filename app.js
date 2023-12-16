@@ -1,5 +1,3 @@
-
-
 const express = require("express");
 const path = require("path");
 const { open } = require("sqlite");
@@ -8,7 +6,7 @@ const bcrypt = require("bcrypt");
 const app = express();
 app.use(express.json());
 
-const dbpath = path.oin(__dirname, "userData.db");
+const dbpath = path.join(__dirname, "userData.db");
 let db = null;
 
 const initializeDBAndServer = async () => {
@@ -43,14 +41,16 @@ app.post("/register", async (request, response) => {
 
   switch (true) {
     case responseuserExists !== undefined:
+      response.status(400);
       response.send("User already exists");
 
     case passwordLength < 5:
+      response.status(400);
       response.send("Password is too short");
     case responseuserExists === undefined:
       const createUser = `
             INSERT INTO
-            user(usernamse,name,password,gender,location)
+            user(username,name,password,gender,location)
             VALUES(
                 '${username}',
                 '${name}',
@@ -59,6 +59,7 @@ app.post("/register", async (request, response) => {
                 '${location}'
             );`;
       await db.run(createUser);
+      response.status(200);
       response.send("User created successfully");
   }
 });
@@ -77,42 +78,46 @@ app.post("/login", async (request, response) => {
 
   switch (true) {
     case responseuserRegisteredornot === undefined:
+      response.status(400);
       response.send("Invalid User");
     case comparepassword !== true:
+      response.status(400);
       response.send("Invalid password");
     case (responseuserRegisteredornot !== undefined) &
       (comparepassword === true):
+      response.status(200);
       response.send("Login success!");
   }
 });
 
-app.put('/change-password',(request,response)=>{
+app.put("/change-password", async (request, response) => {
+  const { username, oldPassword, newPassword } = request.body;
 
-    const {username,oldPassword,newPassword}=request.body;
+  const getuser = `SELECT * FROM user WHERE username='${username};`;
+  const responsegetuser = await db.get(getuser);
+  const comparepass = await bcrypt.compare(
+    oldPassword,
+    responsegetuser.password
+  );
+  const passlength = newPassword.length;
 
-    const getuser=`SELECT * FROM user WHERE username='${username};`;
-    const responsegetuser=await db.get(getuser);
-    const comparepass=await bcrypt.compare(oldPassword,responsegetuser.password);
-    const passlength=newPassword.length;
+  switch (true) {
+    case comparepass !== true:
+      response.status(400);
+      response.send("Invalid curent password");
+    case passlength < 5:
+      response.status(400);
+      response.send("Password too short");
 
-    switch (true) {
-        case (comparepass!==true):
-            response.send('Invalid curent password')
-        case(passlength<5):
-            response.send('Password too short');
-
-        case(responsegetuser!==undefined):
-            const addingnewpassword=`INSERT INTO 
+    case responsegetuser !== undefined:
+      const addingnewpassword = `INSERT INTO 
             user(password)
             VALUES('${newPassword};`;
 
-            await db.run(addingnewpassword);
-            response.send('Password Updated');
-    }
-
-
-
+      await db.run(addingnewpassword);
+      response.status(200);
+      response.send("Password Updated");
+  }
 });
 
-
-module.exports=app;
+module.exports = app;
