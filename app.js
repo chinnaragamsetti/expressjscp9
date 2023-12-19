@@ -26,11 +26,14 @@ const initializeDBAndServer = async () => {
 initializeDBAndServer();
 
 app.post("/register", async (request, response) => {
-  const { username, name, password, gender, location } = request.body;
+  const todoDetails = request.body;
+  const { username, name, password, gender, location } = todoDetails;
 
   const hashedPassword = await bcrypt.hash(password, 10);
+  console.log(hashedPassword);
 
   const passwordLength = password.length;
+  console.log(passwordLength);
 
   let database = null;
 
@@ -54,7 +57,7 @@ app.post("/register", async (request, response) => {
             VALUES(
                 '${username}',
                 '${name}',
-                '${password}',
+                '${hashedPassword}',
                 '${gender}',
                 '${location}'
             );`;
@@ -93,18 +96,19 @@ app.post("/login", async (request, response) => {
 app.put("/change-password", async (request, response) => {
   const { username, oldPassword, newPassword } = request.body;
 
-  const getuser = `SELECT * FROM user WHERE username='${username};`;
+  const getuser = `SELECT * FROM user WHERE username='${username}';`;
   const responsegetuser = await db.get(getuser);
   const comparepass = await bcrypt.compare(
     oldPassword,
     responsegetuser.password
   );
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
   const passlength = newPassword.length;
 
   switch (true) {
     case comparepass !== true:
       response.status(400);
-      response.send("Invalid curent password");
+      response.send("Invalid current password");
     case passlength < 5:
       response.status(400);
       response.send("Password too short");
@@ -112,12 +116,20 @@ app.put("/change-password", async (request, response) => {
     case responsegetuser !== undefined:
       const addingnewpassword = `INSERT INTO 
             user(password)
-            VALUES('${newPassword};`;
+            VALUES('${hashedNewPassword};'`;
 
       await db.run(addingnewpassword);
       response.status(200);
       response.send("Password Updated");
   }
 });
+
+/*app.get("/todo/", async (request, response) => {
+  const todoQuery = `
+SELECT * FROM user;`;
+
+  const dbtodoQuery = await db.all(todoQuery);
+  response.send(dbtodoQuery);
+});*/
 
 module.exports = app;
