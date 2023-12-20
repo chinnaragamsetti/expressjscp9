@@ -124,12 +124,12 @@ app.put("/change-password", async (request, response) => {
   }
 });
 
-/*app.get("/todo/", async (request, response) => {
+app.get("/todo/", async (request, response) => {
   const todoQuery = `
 SELECT * FROM user;`;
 
   const dbtodoQuery = await db.all(todoQuery);
   response.send(dbtodoQuery);
-});*/
+});
 
 module.exports = app;
