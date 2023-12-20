@@ -3,9 +3,9 @@ Content-Type: application/json
 
 
 {
-  "username": "adam_richard",
+  "username": "rajkumar@4",
   "name": "Adam Richard",
-  "password": "richard_567",
+  "password": "raj",
   "gender": "male",
   "location": "Detroit"
 }
@@ -15,8 +15,8 @@ POST http://localhost:3000/login
 Content-Type:application/json
 
 {
-  "username": "adam_richard",
-  "password": "richard_567"
+  "username": "rajkumar@2",
+  "password": "rajkumar@2"
 }
 
 
@@ -25,7 +25,12 @@ PUT http://localhost:3000/change-password
 Content-Type:application/json
 
 {
-  "username": "adam_richard",
-  "oldPassword": "richard_567",
-  "newPassword": "richard@123"
+  "username": "rajkumar@2",
+  "oldPassword": "rajkumar@2",
+  "newPassword": "rajkumar@1"
 }
+
+
+
+###
+GET http://localhost:3000/todo/ 
